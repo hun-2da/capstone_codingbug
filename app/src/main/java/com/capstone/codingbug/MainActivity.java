@@ -1,6 +1,7 @@
 package com.capstone.codingbug;
 
 import androidx.annotation.NonNull;
+import android.Manifest;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -8,26 +9,57 @@ import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.normal.TedPermission;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
-    Dialog dialog01;
+    //Dialog dialog01;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         set_fragment();
         //커스텀 다이얼 로그
-        dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
-        dialog01.requestWindowFeature(Window.FEATURE_NO_TITLE); // 타이틀 제거
-        dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
-        dialog01.show(); // 다이얼로그 띄우기
+        //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
+
+        add_permission();
+        //startActivity(new Intent(getApplicationContext(), dialog01.class)); 권한 승인시 다이어로그가 뜨도록 작성하여씁
+
+
+
+        //dialog01.requestWindowFeature(Window.FEATURE_NO_TITLE); // 타이틀 제거
+        //dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
+        //dialog01.show(); // 다이얼로그 띄우기
+    }
+    /**위험 권한을 승인받기 위한 메소드*/
+    public void add_permission(){
+        TedPermission.create().
+                setPermissionListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted() {
+                        Log.d("권한", "승인");
+                        startActivity(new Intent(getApplicationContext(), dialog01.class));
+                        /* 그냥 activity띄움 만약 customdialog로 만들꺼면 dialog를 상속받은 후 .show해서 사용, 검색시 라이브러리를 사용하는 예들이 있을 수 있으니 구분해서 사용*/
+                    }
+                    @Override
+                    public void onPermissionDenied(List<String> deniedPermissions) {
+                        Log.d("권한", "미승인");
+                        finish();
+                    }
+                })
+                .setDeniedMessage("해당 퍼미션이 없음.")
+                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                .check();
     }
 
 
