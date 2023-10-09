@@ -7,9 +7,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
+import android.app.Dialog;
 import android.os.Bundle;
-
+import android.view.Window;
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
 
@@ -17,14 +17,19 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
-
+    Dialog dialog01;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         set_fragment();
+        //커스텀 다이얼 로그
+        dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
+        dialog01.requestWindowFeature(Window.FEATURE_NO_TITLE); // 타이틀 제거
+        dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
+        dialog01.show(); // 다이얼로그 띄우기
     }
+
 
     /**프래그먼트를 뷰페이지에 넣기위한 메소드*/
     public void set_fragment(){
