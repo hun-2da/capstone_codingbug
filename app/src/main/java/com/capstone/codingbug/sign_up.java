@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class sign_up extends AppCompatActivity {
 
-    private static final String TAG = "register";
+    private static final String TAG = "sign_up";
     private boolean isExistBlank = false;
     private boolean isPWSame = false;
 
@@ -27,6 +27,8 @@ public class sign_up extends AppCompatActivity {
 
         Button btn_register2 = findViewById(R.id.btn_register);
         EditText edit_id = findViewById(R.id.edit_id);
+        EditText edit_name = findViewById(R.id.edit_name);
+        EditText edit_pn = findViewById(R.id.edit_pn);
         EditText edit_pw = findViewById(R.id.edit_pw);
         EditText edit_pw_re = findViewById(R.id.edit_pw_re);
 
@@ -36,6 +38,8 @@ public class sign_up extends AppCompatActivity {
                 Log.d(TAG, "회원가입 버튼 클릭");
 
                 String id = edit_id.getText().toString();
+                String name = edit_name.getText().toString();
+                String pn = edit_pn.getText().toString();
                 String pw = edit_pw.getText().toString();
                 String pw_re = edit_pw_re.getText().toString();
 
@@ -54,6 +58,8 @@ public class sign_up extends AppCompatActivity {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("id", id);
                     editor.putString("pw", pw);
+                    editor.putString("name", name);
+                    editor.putString("pn", pn);
                     editor.apply();
 
                     Intent intent = new Intent(sign_up.this, dialog01.class);

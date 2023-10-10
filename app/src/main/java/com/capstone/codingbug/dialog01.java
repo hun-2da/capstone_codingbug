@@ -3,6 +3,7 @@ package com.capstone.codingbug;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,31 +15,22 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class dialog01 extends AppCompatActivity {
-
     private static final String TAG = "dialog01";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog01);
-        setLoginDialog();
-    }
 
-    // 로그인 다이얼로그를 띄우는 함수
-    private void setLoginDialog() {
-        // 다이얼로그 레이아웃 초기화 및 설정
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("로그인");
-        dialog.setView(R.layout.dialog01); // 로그인 다이얼로그 레이아웃 설정
+        // 로그인 버튼
+        Button btn_login = findViewById(R.id.btn_login);
+        EditText edit_id = findViewById(R.id.edit_id);
+        EditText edit_pw = findViewById(R.id.edit_pw);
 
-        // 로그인 버튼 클릭 리스너 설정
-        dialog.setPositiveButton("로그인", new DialogInterface.OnClickListener() {
+        btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                // 다이얼로그에서 입력된 값을 처리하는 코드 작성
-                EditText edit_id = ((AlertDialog) dialogInterface).findViewById(R.id.edit_id);
-                EditText edit_pw = ((AlertDialog) dialogInterface).findViewById(R.id.edit_pw);
-
+            public void onClick(View v) {
+                // EditText로부터 입력된 값을 받아온다
                 String id = edit_id.getText().toString();
                 String pw = edit_pw.getText().toString();
 
@@ -48,23 +40,30 @@ public class dialog01 extends AppCompatActivity {
                 String savedPw = sharedPreference.getString("pw", "");
 
                 // 유저가 입력한 id, pw값과 SharedPreferences로 불러온 id, pw값 비교
-                if (id.equals(savedId) && pw.equals(savedPw)) {
+                if (id.equals(savedId) && pw.equals(savedPw)&&(id == "" || pw == "")) {
                     // 로그인 성공 다이얼로그 보여주기
-                    showResultDialog("success");
+                    dialog("success");
+                    new MainActivity().set_fragment();
                 } else {
                     // 로그인 실패 다이얼로그 보여주기
-                    showResultDialog("fail");
+                    dialog("fail");
                 }
             }
         });
 
-        // 다이얼로그 생성 및 표시
-        AlertDialog alertDialog = dialog.create();
-        alertDialog.show();
+        // 회원가입 버튼
+        Button btn_register = findViewById(R.id.btn_register);
+        btn_register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(dialog01.this, sign_up.class);
+                startActivity(intent);
+            }
+        });
     }
 
-    // 로그인 결과 다이얼로그를 표시하는 함수
-    private void showResultDialog(String type) {
+    // 로그인 성공/실패 시 다이얼로그를 띄워주는 메소드
+    private void dialog(String type) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
         if (type.equals("success")) {
@@ -88,4 +87,3 @@ public class dialog01 extends AppCompatActivity {
         dialog.show();
     }
 }
-

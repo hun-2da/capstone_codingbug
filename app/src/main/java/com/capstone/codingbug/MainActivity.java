@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        set_fragment();
+
         //커스텀 다이얼 로그
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
 
