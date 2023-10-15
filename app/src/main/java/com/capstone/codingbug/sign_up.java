@@ -4,29 +4,25 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
 public class sign_up extends AppCompatActivity {
 
     private static final String TAG = "sign_up";
-    private boolean isExistBlank = false;
-    private boolean isPWSame = false;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
         Button btn_register2 = findViewById(R.id.btn_register);
-        EditText edit_id = findViewById(R.id.edit_id);
         EditText edit_name = findViewById(R.id.edit_name);
         EditText edit_pn = findViewById(R.id.edit_pn);
         EditText edit_pw = findViewById(R.id.edit_pw);
@@ -37,39 +33,33 @@ public class sign_up extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "회원가입 버튼 클릭");
 
-                String id = edit_id.getText().toString();
                 String name = edit_name.getText().toString();
                 String pn = edit_pn.getText().toString();
                 String pw = edit_pw.getText().toString();
                 String pw_re = edit_pw_re.getText().toString();
 
-                if (id.isEmpty() || pw.isEmpty() || pw_re.isEmpty()) {
-                    isExistBlank = true;
+                if (name.isEmpty() || pn.isEmpty() || pw.isEmpty() || pw_re.isEmpty()) {
+                    dialog("blank");
+                } else if (!pw.equals(pw_re)) {
+                    dialog("not same");
                 } else {
-                    if (pw.equals(pw_re)) {
-                        isPWSame = true;
-                    }
-                }
+                    // 회원가입 성공
+                    User newUser = new User();
+                    newUser.setUsername(name);
+                    newUser.setPn(Integer.parseInt(pn));
+                    newUser.setPw(pw);
 
-                if (!isExistBlank && isPWSame) {
+                    // Room 데이터베이스에 사용자 추가
+                    AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app-database").allowMainThreadQueries().build();
+                    UserDao userDao = db.userDao();
+                    userDao.insertUser(newUser);
+
                     Toast.makeText(sign_up.this, "회원가입 성공", Toast.LENGTH_SHORT).show();
 
-                    SharedPreferences sharedPreferences = getSharedPreferences("file name", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("id", id);
-                    editor.putString("pw", pw);
-                    editor.putString("name", name);
-                    editor.putString("pn", pn);
-                    editor.apply();
-
-                    Intent intent = new Intent(sign_up.this, dialog01.class);
+                    // 나머지 코드 (성공적인 회원가입 후 실행)
+                    Intent intent = new Intent(sign_up.this, sign_in.class);
                     startActivity(intent);
-                } else {
-                    if (isExistBlank) {
-                        dialog("blank");
-                    } else if (!isPWSame) {
-                        dialog("not same");
-                    }
+                    finish();
                 }
             }
         });

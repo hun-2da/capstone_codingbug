@@ -8,11 +8,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-import android.app.Dialog;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Window;
+
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
 import com.gun0912.tedpermission.PermissionListener;
@@ -20,15 +20,18 @@ import com.gun0912.tedpermission.normal.TedPermission;
 
 import java.util.ArrayList;
 import java.util.List;
+import androidx.room.Room;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
     //Dialog dialog01;
+    private AppDatabase db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app-database").build();
         //커스텀 다이얼 로그
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
 
@@ -41,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
         //dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
         //dialog01.show(); // 다이얼로그 띄우기
     }
+    public AppDatabase getDatabase() {
+        return db;
+    }
     /**위험 권한을 승인받기 위한 메소드*/
     public void add_permission(){
         TedPermission.create().
@@ -48,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionGranted() {
                         Log.d("권한", "승인");
-                        startActivity(new Intent(getApplicationContext(), dialog01.class));
+                        startActivity(new Intent(getApplicationContext(), sign_in.class));
                         /* 그냥 activity띄움 만약 customdialog로 만들꺼면 dialog를 상속받은 후 .show해서 사용, 검색시 라이브러리를 사용하는 예들이 있을 수 있으니 구분해서 사용*/
                     }
                     @Override

@@ -14,13 +14,13 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class dialog01 extends AppCompatActivity {
+public class sign_in extends AppCompatActivity {
     private static final String TAG = "dialog01";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog01);
+        setContentView(R.layout.activity_sign_in);
 
         // 로그인 버튼
         Button btn_login = findViewById(R.id.btn_login);
@@ -40,10 +40,13 @@ public class dialog01 extends AppCompatActivity {
                 String savedPw = sharedPreference.getString("pw", "");
 
                 // 유저가 입력한 id, pw값과 SharedPreferences로 불러온 id, pw값 비교
-                if (id.equals(savedId) && pw.equals(savedPw)&&(id == "" || pw == "")) {
+                if (id.equals(savedId) && pw.equals(savedPw)&&(id != "" || pw != "")) {
                     // 로그인 성공 다이얼로그 보여주기
                     dialog("success");
                     new MainActivity().set_fragment();
+                    Intent intent = new Intent(sign_in.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
                     // 로그인 실패 다이얼로그 보여주기
                     dialog("fail");
@@ -56,7 +59,7 @@ public class dialog01 extends AppCompatActivity {
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(dialog01.this, sign_up.class);
+                Intent intent = new Intent(sign_in.this, sign_up.class);
                 startActivity(intent);
             }
         });
