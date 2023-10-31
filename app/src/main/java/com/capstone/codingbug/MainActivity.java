@@ -8,22 +8,31 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-import android.app.Dialog;
+
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Window;
+import android.view.View;
+import android.widget.Toast;
+
+import com.capstone.codingbug.database_mysql.DatabaseConnection;
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
+import com.capstone.codingbug.user_log.LoginPage;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.normal.TedPermission;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager2;
     //Dialog dialog01;
+    //private Connection connection=null;
+    public static Statement statement=null;
+    public static DatabaseConnection  databaseConnection= null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,16 +40,43 @@ public class MainActivity extends AppCompatActivity {
 
         //커스텀 다이얼 로그
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
+        set_fragment();
+        /*로딩 화면에서 데이터베이스 connect시도 만약 실패시 무한로딩 또는 종료시키는 코드안에 추가*/
+        for(int i=0;i<20;i++) { Log.e("시도중",Integer.toString(i)+"시도중");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    databaseConnection = new DatabaseConnection(getApplicationContext());
+                    statement = databaseConnection.get_mysql();
+
+                }
+            }).start();
+            // 현재 코드는 스레드로 날려 응답받기 전에 connection이 null인지 확인함으로 무조건 한번의 sleep이 일어남으로 수정 필요
+            if(statement!=null) break;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        }if(statement == null) finish();
 
         add_permission();
         //startActivity(new Intent(getApplicationContext(), dialog01.class)); 권한 승인시 다이어로그가 뜨도록 작성하여씁
 
-
-
         //dialog01.requestWindowFeature(Window.FEATURE_NO_TITLE); // 타이틀 제거
         //dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
         //dialog01.show(); // 다이얼로그 띄우기
+
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
     }
+
     /**위험 권한을 승인받기 위한 메소드*/
     public void add_permission(){
         TedPermission.create().
@@ -48,7 +84,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionGranted() {
                         Log.d("권한", "승인");
-                        startActivity(new Intent(getApplicationContext(), dialog01.class));
+                        Intent intent = new Intent(getApplicationContext(), LoginPage.class);
+                        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+
                         /* 그냥 activity띄움 만약 customdialog로 만들꺼면 dialog를 상속받은 후 .show해서 사용, 검색시 라이브러리를 사용하는 예들이 있을 수 있으니 구분해서 사용*/
                     }
                     @Override
@@ -105,4 +144,8 @@ public class MainActivity extends AppCompatActivity {
             items.add(item);
         }
     }
+    public static void print(Context context, String message){
+        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+    }
+
 }

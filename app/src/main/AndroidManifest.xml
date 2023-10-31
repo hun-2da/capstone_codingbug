@@ -5,8 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="com.example.doit22.READ_DATABASE" android:protectionLevel = "normal"/>
-    <uses-permission android:name="com.example.doit22.WRITE_DATABASE" android:protectionLevel = "normal"/>
 
     <application
         android:usesCleartextTraffic="true"
@@ -20,10 +18,10 @@
         android:theme="@style/Theme.안심귀갓길"
         tools:targetApi="31">
         <activity
-            android:name=".sign_up"
+            android:name=".user_log.new_user"
             android:exported="false" />
         <activity
-            android:name=".dialog01"
+            android:name=".user_log.LoginPage"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
