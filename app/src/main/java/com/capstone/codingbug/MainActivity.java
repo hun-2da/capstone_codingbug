@@ -13,13 +13,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.capstone.codingbug.database_mysql.DatabaseConnection;
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
 import com.capstone.codingbug.user_log.LoginPage;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.normal.TedPermission;
 
@@ -28,7 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    ViewPager2 viewPager2;
+    //ViewPager2 viewPager2;
+    BottomNavigationView bottomNavigationView;
+    LinearLayout container;
+
+
+
     //Dialog dialog01;
     //private Connection connection=null;
     public static Statement statement=null;
@@ -40,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         //커스텀 다이얼 로그
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
-        set_fragment();
+        //set_fragment();
         /*로딩 화면에서 데이터베이스 connect시도 만약 실패시 무한로딩 또는 종료시키는 코드안에 추가*/
         for(int i=0;i<20;i++) { Log.e("시도중",Integer.toString(i)+"시도중");
             new Thread(new Runnable() {
@@ -102,23 +110,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**프래그먼트를 뷰페이지에 넣기위한 메소드*/
+    /**프래그먼트를 바텀 네비게션에 연결위한 메소드*/
     public void set_fragment(){
-        viewPager2 = findViewById(R.id.myviewpager); //xml에 있는 뷰페이저 연결
-        viewPager2.setOffscreenPageLimit(1);
+        //viewPager2 = findViewById(R.id.myviewpager); //xml에 있는 뷰페이저 연결
+        //viewPager2.setOffscreenPageLimit(1);
 
-        MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager(),getLifecycle());
+        //MyPagerAdapter pagerAdapter = new MyPagerAdapter(getSupportFragmentManager(),getLifecycle());
 
         MyLocation_Fragment locationFragment = new MyLocation_Fragment();
-        pagerAdapter.addItem(locationFragment);//location fragment를 pager index0에 저장
+        //pagerAdapter.addItem(locationFragment);//location fragment를 pager index0에 저장
 
         ReadLocation_Fragment readLocationFragment = new ReadLocation_Fragment();
-        pagerAdapter.addItem(readLocationFragment);//보호자페이지(로케이션을 읽어들여 지도에 띄워줄 fragment)
+        //pagerAdapter.addItem(readLocationFragment);//보호자페이지(로케이션을 읽어들여 지도에 띄워줄 fragment)
 
-        viewPager2.setAdapter(pagerAdapter);
+
+        getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,locationFragment).commit();
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if(item.getItemId() == R.id.tab1){
+                    print(getApplicationContext(),"길찾기 기능 탭입니다. ");
+                    getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,locationFragment).commit();
+                    return true;
+                }
+                else if(item.getItemId() == R.id.tab2){
+                        print(getApplicationContext(), "보호자 탭입니다. ");
+                        getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,readLocationFragment).commit();
+                        return true;
+                } else
+                     return false;
+            }
+        });
+
+        //viewPager2.setAdapter(pagerAdapter);
     }
 
-    /**뷰페이저를 관리해줄 어댑터 클래스*/
+    //뷰페이저를 관리해줄 어댑터 클래스
     class MyPagerAdapter extends FragmentStateAdapter{
 
         /**프래그먼트들을 저장을 해둘 리스트*/
