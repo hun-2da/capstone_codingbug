@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".pagerFragments.MyLocation_Fragment">
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayoutTmap"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="내 위치를 띄워줄 화면" />
     </LinearLayout>
-</FrameLayout>
+</android.widget.LinearLayout>
