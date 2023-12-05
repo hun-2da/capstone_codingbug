@@ -1,7 +1,9 @@
 package com.capstone.codingbug.user_log;
 
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -20,6 +22,7 @@ import com.capstone.codingbug.MainActivity;
 import com.capstone.codingbug.R;
 import com.capstone.codingbug.database_mysql.DatabaseConnection;
 import com.capstone.codingbug.database_mysql.keyword.UserDB;
+import com.capstone.codingbug.localdb.LocalDataBaseHelper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -84,11 +87,22 @@ public class LoginPage extends AppCompatActivity {
                                                 Log.d("트라이",resultSet.getString(UserDB.USER_ID));
                                                 Log.d("트라이","성공");
 
+                                                LocalDataBaseHelper localdb = new LocalDataBaseHelper(getApplicationContext()); // 로컬 데이터베이스 생성
+                                                SQLiteDatabase db = localdb.getWritableDatabase();
+                                                ContentValues values = new ContentValues();
+                                                values.put("my_id", id);
+                                                values.put("parent_mobile", "");
+
+                                                long newRowId = db.insert("user_log", null, values);
+                                                if(newRowId == -1) Log.d("로컬디비","저장되지 못했음");
+
                                                 Handler handler = new Handler(Looper.getMainLooper());
                                                 handler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
                                                 MainActivity.print(getApplicationContext(),"로그인 성공");
+
+                                                finish();
                                                     }
                                                 });
                                                 //dialog("success");

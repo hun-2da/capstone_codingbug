@@ -15,17 +15,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.capstone.codingbug.database_mysql.DatabaseConnection;
+import com.capstone.codingbug.localdb.LocalDataBaseHelper;
 import com.capstone.codingbug.pagerFragments.MyLocation_Fragment;
 import com.capstone.codingbug.pagerFragments.ReadLocation_Fragment;
+import com.capstone.codingbug.pagerFragments.SetFragment;
 import com.capstone.codingbug.user_log.LoginPage;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.normal.TedPermission;
 
+import java.io.File;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
     //ViewPager2 viewPager2;
     BottomNavigationView bottomNavigationView;
     LinearLayout container;
-
-
+    Button button;
 
     //Dialog dialog01;
     //private Connection connection=null;
@@ -45,10 +48,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //커스텀 다이얼 로그
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
-        //set_fragment();
+
+        bottomNavigationView = findViewById(R.id.bottombar);
+        button = findViewById(R.id.button);
+
         /*로딩 화면에서 데이터베이스 connect시도 만약 실패시 무한로딩 또는 종료시키는 코드안에 추가*/
         for(int i=0;i<20;i++) { Log.e("시도중",Integer.toString(i)+"시도중");
             new Thread(new Runnable() {
@@ -69,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         }if(statement == null) finish();
 
+
         add_permission();
         //startActivity(new Intent(getApplicationContext(), dialog01.class)); 권한 승인시 다이어로그가 뜨도록 작성하여씁
 
@@ -76,7 +82,10 @@ public class MainActivity extends AppCompatActivity {
         //dialog01.setContentView(R.layout.dialog01);             // xml 레이아웃 파일과 연결
         //dialog01.show(); // 다이얼로그 띄우기
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+
+
+
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -92,10 +101,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onPermissionGranted() {
                         Log.d("권한", "승인");
-                        Intent intent = new Intent(getApplicationContext(), LoginPage.class);
-                        //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
 
+                        boolean isExist = isDatabaseExist(getApplicationContext(), LocalDataBaseHelper.NAME);
+
+                        if(!isExist){
+                            Intent intent = new Intent(getApplicationContext(), LoginPage.class);
+                            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+
+                        }
+
+                        set_fragment();
                         /* 그냥 activity띄움 만약 customdialog로 만들꺼면 dialog를 상속받은 후 .show해서 사용, 검색시 라이브러리를 사용하는 예들이 있을 수 있으니 구분해서 사용*/
                     }
                     @Override
@@ -105,7 +121,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setDeniedMessage("해당 퍼미션이 없음.")
-                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                .setPermissions(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.RECEIVE_SMS,
+                        Manifest.permission.SEND_SMS)
                 .check();
     }
 
@@ -123,54 +143,73 @@ public class MainActivity extends AppCompatActivity {
         ReadLocation_Fragment readLocationFragment = new ReadLocation_Fragment();
         //pagerAdapter.addItem(readLocationFragment);//보호자페이지(로케이션을 읽어들여 지도에 띄워줄 fragment)
 
+        SetFragment setFragment = new SetFragment();
 
-        getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,locationFragment).commit();
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.Container,readLocationFragment).commit();
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if(item.getItemId() == R.id.tab1){
-                    print(getApplicationContext(),"길찾기 기능 탭입니다. ");
-                    getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,locationFragment).commit();
+                if (item.getItemId() == R.id.tab3) {
+                    button.setVisibility(View.INVISIBLE);
+                    //print(getApplicationContext(), "설정 탭입니다. ");
+                    getSupportFragmentManager().beginTransaction().replace(R.id.Container, setFragment).commit();
                     return true;
                 }
-                else if(item.getItemId() == R.id.tab2){
-                        print(getApplicationContext(), "보호자 탭입니다. ");
-                        getSupportFragmentManager().beginTransaction().replace(androidx.core.R.id.action_container,readLocationFragment).commit();
+                else {
+                    button.setVisibility(View.VISIBLE);
+                    if (item.getItemId() == R.id.tab2) {
+                        //print(getApplicationContext(), "보호자 탭입니다. ");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.Container, readLocationFragment).commit();//androidx.core.R.id.action_container
                         return true;
-                } else
-                     return false;
+                    } else if(item.getItemId() == R.id.tab1){
+                        button.setVisibility(View.VISIBLE);
+                        //print(getApplicationContext(),"길찾기 기능 탭입니다. ");
+                        getSupportFragmentManager().beginTransaction().replace(R.id.Container,locationFragment).commit();
+                        return true;
+                    }
+                    else
+                        return false;
+                }
             }
         });
 
         //viewPager2.setAdapter(pagerAdapter);
     }
 
-    //뷰페이저를 관리해줄 어댑터 클래스
+   /* //뷰페이저를 관리해줄 어댑터 클래스
     class MyPagerAdapter extends FragmentStateAdapter{
 
-        /**프래그먼트들을 저장을 해둘 리스트*/
+        *//**프래그먼트들을 저장을 해둘 리스트*//*
         private ArrayList<Fragment> items = new ArrayList<>();
         public MyPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
             super(fragmentManager, lifecycle);
         }
-        /**콜백 메소드*/
+        *//**콜백 메소드*//*
         @NonNull
         @Override
         public Fragment createFragment(int position) {
             return items.get(position);
         }
-
-        /**프래그먼트 개수를 리턴(사이즈를 지정해 줘야 작동)*/
+        *//**프래그먼트 개수를 리턴(사이즈를 지정해 줘야 작동)*//*
         @Override
         public int getItemCount() {
             return items.size();
         }
 
-        /**arraylist에 프래그먼트를 저장해줄 메소드*/
+        *//**arraylist에 프래그먼트를 저장해줄 메소드*//*
         public void addItem(Fragment item){
             items.add(item);
         }
+    }*/
+
+    /**로컬 데이터베이스가 존재하는지 확인하는 메소드*/
+    public boolean isDatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
     }
+
     public static void print(Context context, String message){
         Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
     }

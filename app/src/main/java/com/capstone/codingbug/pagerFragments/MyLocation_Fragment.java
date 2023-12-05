@@ -22,10 +22,10 @@ public class MyLocation_Fragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_my_location_, container, false);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_my_location_, container, false);
 
-        LinearLayout linearLayoutTmap = view.findViewById(R.id.linearLayoutTmap);
-        tMapView = new TMapView(getActivity());
+        LinearLayout linearLayoutTmap = (LinearLayout) view.findViewById(R.id.llt);
+        tMapView = new TMapView(getActivity().getApplicationContext());
 
         tMapView.setSKTMapApiKey("6QqIU9fnZUao65WJCM7ptafry6XfQovT1PoVoB4a");
         linearLayoutTmap.addView(tMapView);
