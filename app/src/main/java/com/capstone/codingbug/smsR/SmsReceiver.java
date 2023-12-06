@@ -90,24 +90,27 @@ public class SmsReceiver extends BroadcastReceiver {
         db.execSQL(INSERT_LOCATION);
         db.close();
     }
+   public void new_marker(Context context, double latitude, double longitude) {
+       TMapMarkerItem markerItem1 = new TMapMarkerItem();
 
-    public void new_marker(Context context, double latitude, double longitude){
-        TMapMarkerItem markerItem1 = new TMapMarkerItem();
+       TMapPoint tMapPoint1 = new TMapPoint(latitude, longitude);
 
-        TMapPoint tMapPoint1 = new TMapPoint(latitude, longitude);
+       Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_icon);
+       int width = 120;
+       int height = 120;
+       boolean filter = true;  // 필터링. true로 설정하면 스무딩 효과를 줍니다.
+       Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, filter);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.marker_icon);
-        int width = 120;
-        int height = 120;
-        boolean filter = true;  // 필터링. true로 설정하면 스무딩 효과를 줍니다.
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, filter);
+       // 각 마커에 고유한 ID로 타임스탬프를 사용합니다.
+       String markerId = "markerItem" + System.currentTimeMillis();
 
-        markerItem1.setIcon(resizedBitmap); // 마커 아이콘 지정
-        markerItem1.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
-        markerItem1.setTMapPoint( tMapPoint1 ); // 마커의 좌표 지정
-        markerItem1.setName("피보호자 위치" + count++); // 마커의 타이틀 지정
-        ReadLocation_Fragment.tMapView2.addMarkerItem("markerItem"+count, markerItem1); // 지도에 마커 추가
+       markerItem1.setIcon(resizedBitmap); // 마커 아이콘 지정
+       markerItem1.setPosition(0.5f, 1.0f); // 마커의 중심점을 중앙, 하단으로 설정
+       markerItem1.setTMapPoint(tMapPoint1); // 마커의 좌표 지정
+       markerItem1.setName("피보호자 위치" + count++); // 마커의 타이틀 지정
+       ReadLocation_Fragment.tMapView2.addMarkerItem(markerId, markerItem1); // 지도에 마커 추가
 
-        ReadLocation_Fragment.tMapView2.setCenterPoint(tMapPoint1.getLongitude(),tMapPoint1.getLatitude());
-    }
+       // 지도의 중심점을 새 마커의 위치로 설정합니다.
+       ReadLocation_Fragment.tMapView2.setCenterPoint(tMapPoint1.getLongitude(), tMapPoint1.getLatitude());
+   }
 }

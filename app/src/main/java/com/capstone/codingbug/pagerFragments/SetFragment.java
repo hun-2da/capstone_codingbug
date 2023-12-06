@@ -1,9 +1,11 @@
 package com.capstone.codingbug.pagerFragments;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -27,6 +29,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.Toast;
 
 import com.capstone.codingbug.MainActivity;
 import com.capstone.codingbug.R;
@@ -48,6 +51,8 @@ public class SetFragment extends Fragment {
     String phone1;
     String p_phone = "";
     Switch smsSwitch;
+
+    Handler mainHandler = new Handler(Looper.getMainLooper());
 
     boolean message_boolean = false;
 
@@ -124,13 +129,13 @@ public class SetFragment extends Fragment {
                     ResultSet resultSet = preparedStatement.executeQuery();
 
                     if (resultSet.next()) {
-                        String parentUserId = resultSet.getString(ParentUserTable.PARENT_USER_ID);
+                        String parentUser_phone = resultSet.getString(ParentUserTable.PARENT_USER_ID);
                         //MainActivity.print(getContext().getApplicationContext(),parentUserId);
 
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                editText.setText(parentUserId);
+                                editText.setText(parentUser_phone);
                             }
                         });
 
@@ -225,6 +230,13 @@ public class SetFragment extends Fragment {
 
                             } else {
                                 Log.e("rds","해당 폰 번호가 없음");
+                                mainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        MainActivity.print(getActivity().getApplicationContext(),"해당 번호는 가입되지 않은 휴대폰 번호입니다.");
+                                    }
+                                });
+
                             }
                         } catch (SQLException e) {
                             Log.e("로컬디비","SQLException");
@@ -255,15 +267,14 @@ public class SetFragment extends Fragment {
                             }
                         }*/
                         try{
-                            Log.e("RDS","INSERT 쿼리1");
-                            String my_query = "INSERT INTO " + ParentUserTable.TABLE_NAME + " (my_id, parent_phone) VALUES (?, ?)";
-                            PreparedStatement pS2 = MainActivity.databaseConnection.create_pStatement(my_query);
-                            pS2.setString(1, m_id);
-                            pS2.setString(2, phone1);
-                            Log.e("RDS","INSERT 쿼리2");
-                            pS2.executeUpdate();
-                        }catch(SQLException e){
-                            Log.e("RDS","INSERT 실패" + e.getMessage());
+                        String myid_query = "SELECT * FROM "+ParentUserTable.TABLE_NAME+" WHERE "+ParentUserTable.MY_ID+" = ?"; //RDS에 이미 내 아이디가 존재하는지 확인
+                        PreparedStatement ps_myid = MainActivity.databaseConnection.create_pStatement(myid_query);
+                        ps_myid.setString(1, m_id);
+                        ResultSet resultSet = ps_myid.executeQuery();
+                        Log.e("RDS","번호찾기 쿼리2");
+
+                        if (resultSet.next()) {
+                            //동일한 id가 존재하는 경우 업데이트
                             try {
                                 String myQuery = "UPDATE " + ParentUserTable.TABLE_NAME + " SET parent_phone = ? WHERE my_id = ?";
                                 PreparedStatement pS2 = MainActivity.databaseConnection.create_pStatement(myQuery);
@@ -274,6 +285,19 @@ public class SetFragment extends Fragment {
                             } catch(SQLException e2){
                                 Log.e("RDS","update 실패" +  e2.getMessage());
                             }
+                        }else{
+                            //없다면 추가
+                            Log.e("RDS","INSERT 쿼리1");
+                            String my_query = "INSERT INTO " + ParentUserTable.TABLE_NAME + " (my_id, parent_phone) VALUES (?, ?)";
+                            PreparedStatement pS2 = MainActivity.databaseConnection.create_pStatement(my_query);
+                            pS2.setString(1, m_id);
+                            pS2.setString(2, phone1);
+                            Log.e("RDS","INSERT 쿼리2");
+                            pS2.executeUpdate();
+                            }
+                        }catch(SQLException e){
+                            Log.e("RDS","INSERT 실패" + e.getMessage());
+
                         }
                     }
                 }).start();
@@ -281,22 +305,94 @@ public class SetFragment extends Fragment {
         });
 
 
+        /**로그아웃 버튼. */
         Button out_button = view.findViewById(R.id.logout_button);
         out_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(delete_db())
-                    Log.e("로컬디비","delete실패");
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("로그아웃 하시겠습니까?")
+                        .setMessage("로그아웃하면 기록이 전부 사라집니다\n로그아웃 하시겠습니까?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // 'Yes' 버튼 클릭 시 수행할 작업을 여기에 작성합니다.
+                                Toast.makeText(getActivity().getApplicationContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
 
+                                if(!delete_db())
+                                    Log.e("로컬디비","delete실패");
+                                Intent i = getActivity().getBaseContext().getPackageManager()
+                                        .getLaunchIntentForPackage( getActivity().getBaseContext().getPackageName());
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(i);
+
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // 'No' 버튼 클릭 시 수행할 작업을 여기에 작성합니다.
+                            }
+                        })
+                        .show();
             }
         });
 
+        /**회원 탈퇴 버튼*/
         Button delete_button = view.findViewById(R.id.delete_button);
         delete_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(delete_db())
-                    Log.e("로컬디비","delete실패");
+
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("탈퇴...하시겠습니까?")
+                        .setMessage("정말로?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // 'Yes' 버튼 클릭 시 수행할 작업을 여기에 작성합니다.
+
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String[] columns = {LocalDataBaseHelper.my_id};
+                                        Cursor cursor = ldb.query(LocalDataBaseHelper.table, columns, null, null, null, null, null);
+                                        String my_id = "";
+                                        if (cursor.moveToFirst())
+                                            my_id = cursor.getString(0);
+
+                                        try {
+                                            String t2_query = "DELETE FROM " + ParentUserTable.TABLE_NAME + " WHERE " + ParentUserTable.MY_ID + " = ?";
+                                            PreparedStatement pstmt2 = MainActivity.databaseConnection.create_pStatement(t2_query);
+                                            pstmt2.setString(1, my_id);
+                                            pstmt2.executeUpdate();
+
+                                            String t1_query = "DELETE FROM " + UserDB.USER_TABLE_NAME + " WHERE " + UserDB.USER_ID + " = ?";
+                                            PreparedStatement pstmt = MainActivity.databaseConnection.create_pStatement(t1_query);
+                                            pstmt.setString(1, my_id);
+                                            pstmt.executeUpdate();
+
+
+
+                                            if (!delete_db())
+                                                Log.e("로컬디비", "delete실패");
+                                            Intent i = getActivity().getBaseContext().getPackageManager()
+                                                    .getLaunchIntentForPackage(getActivity().getBaseContext().getPackageName());
+                                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                            startActivity(i);
+
+                                        }catch(SQLException e){
+                                            Log.e("RDS","회원정보 삭제 실패" + e.getMessage());
+
+                                        }
+                                    }
+                                }).start();
+
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // 'No' 버튼 클릭 시 수행할 작업을 여기에 작성합니다.
+                            }
+                        })
+                        .show();
             }
         });
 
@@ -334,17 +430,19 @@ public class SetFragment extends Fragment {
 
         }
     }*/
-    Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    double latitude = 0;
+    double longitude = 0;
 
     public void sms_start(String phone, Context context) {
+
+
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
 
-                String message = "안심귀갓길 : (" + latitude + "," + longitude + ")";
-                sendSMS(context,phone, message);
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -361,25 +459,25 @@ public class SetFragment extends Fragment {
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+
                         return;
                     }
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 5, locationListener);
                 }
             });
-
             try {
-                Thread.sleep(180000);  // 3분
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                Thread.sleep(6000);
+                String message = "안심귀갓길 : (" + latitude + "," + longitude + ")";
+                sendSMS(context, phone, message);
+
+
+                Thread.sleep(294000);  // 총 5분에 한번씩
+            }catch(Exception e){}
+
         }
     }
     public void sendSMS(Context context,String phoneNumber, String message) {
