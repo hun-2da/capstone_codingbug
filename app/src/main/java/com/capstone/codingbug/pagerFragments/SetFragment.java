@@ -478,9 +478,8 @@ public class SetFragment extends Fragment {
                 Thread.sleep(294000);  // 총 5분에 한번씩
             }catch(Exception e){}
 
-        }//asd
-    }//46556645645456456
-
+        }
+    }//ㅁㄴㅇㄹㄹ
     public void sendSMS(Context context,String phoneNumber, String message) {
         SmsManager smsManager = SmsManager.getDefault();
         PendingIntent sentPI;
