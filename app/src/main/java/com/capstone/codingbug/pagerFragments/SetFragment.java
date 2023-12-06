@@ -479,8 +479,8 @@ public class SetFragment extends Fragment {
             }catch(Exception e){}
 
         }//asd
-    }//asdfeㅁㄴㅇㄹㄹ
-    //asdfffffffffffffffffffffffffffff
+    }//46556645645456456
+
     public void sendSMS(Context context,String phoneNumber, String message) {
         SmsManager smsManager = SmsManager.getDefault();
         PendingIntent sentPI;
