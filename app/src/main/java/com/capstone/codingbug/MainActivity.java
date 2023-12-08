@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -38,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     //ViewPager2 viewPager2;
     BottomNavigationView bottomNavigationView;
     LinearLayout container;
-    Button button;
 
     //Dialog dialog01;
     //private Connection connection=null;
@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         //dialog01 = new Dialog(MainActivity.this);       // Dialog 초기화
 
         bottomNavigationView = findViewById(R.id.bottombar);
-        button = findViewById(R.id.button);
 
         /*로딩 화면에서 데이터베이스 connect시도 만약 실패시 무한로딩 또는 종료시키는 코드안에 추가*/
         for(int i=0;i<20;i++) { Log.e("시도중",Integer.toString(i)+"시도중");
@@ -83,14 +82,6 @@ public class MainActivity extends AppCompatActivity {
         //dialog01.show(); // 다이얼로그 띄우기
 
 
-
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
 
     }
 
@@ -152,19 +143,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.tab3) {
-                    button.setVisibility(View.INVISIBLE);
+
                     //print(getApplicationContext(), "설정 탭입니다. ");
                     getSupportFragmentManager().beginTransaction().replace(R.id.Container, setFragment).commit();
                     return true;
                 }
                 else {
-                    button.setVisibility(View.VISIBLE);
+
                     if (item.getItemId() == R.id.tab2) {
                         //print(getApplicationContext(), "보호자 탭입니다. ");
                         getSupportFragmentManager().beginTransaction().replace(R.id.Container, readLocationFragment).commit();//androidx.core.R.id.action_container
                         return true;
                     } else if(item.getItemId() == R.id.tab1){
-                        button.setVisibility(View.VISIBLE);
+
                         //print(getApplicationContext(),"길찾기 기능 탭입니다. ");
                         getSupportFragmentManager().beginTransaction().replace(R.id.Container,locationFragment).commit();
                         return true;
@@ -203,6 +194,8 @@ public class MainActivity extends AppCompatActivity {
             items.add(item);
         }
     }*/
+
+
 
     /**로컬 데이터베이스가 존재하는지 확인하는 메소드*/
     public boolean isDatabaseExist(Context context, String dbName) {

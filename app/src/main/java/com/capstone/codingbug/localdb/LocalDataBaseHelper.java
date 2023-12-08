@@ -19,6 +19,7 @@ public class LocalDataBaseHelper extends SQLiteOpenHelper {
     public static String CLATITUDE = "child_latitude";
     public static String CLOGITUDE = "child_longitude";
     public static String CDATE = "child_date";
+    public static final String PHONE_NUMBER = "get_phone";
 
     public static int VERSION = 1;
     public LocalDataBaseHelper(Context context) {
@@ -39,6 +40,7 @@ public class LocalDataBaseHelper extends SQLiteOpenHelper {
         String CREATE_TABLE = "CREATE TABLE " + CTABLENAME + "("
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + CDATE + " TEXT,"
+                + PHONE_NUMBER + " TEXT,"
                 + CLATITUDE + " REAL,"
                 + CLOGITUDE + " REAL" + ")";
         sqLiteDatabase.execSQL(CREATE_TABLE);

@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.widget.Button;
 import android.widget.EditText;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +41,10 @@ public class MyLocation_Fragment extends Fragment {
     private EditText editText2;
     private TMapView tMapView;
 
+    /**입력 주소창을 찾기 위한 띄워줄 frameLayout*/
+    FrameLayout frameLayout;
+
+    Button path_button;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,6 +63,30 @@ public class MyLocation_Fragment extends Fragment {
                 new NetworkTask().execute(s1, s2);
             }
         });
+
+
+        path_button = view.findViewById(R.id.path_Button);
+        frameLayout = view.findViewById(R.id.path_frameLayout);
+
+        /**주소창 닫기 버튼 클릭시*/
+        view.findViewById(R.id.path_close_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                frameLayout.setVisibility(View.INVISIBLE);
+               path_button.setVisibility(View.VISIBLE);
+            }
+        });
+
+        /**주소 띄우기 버튼*/
+        path_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                frameLayout.setVisibility(View.VISIBLE);
+                path_button.setVisibility(View.INVISIBLE);
+            }
+        });
+
+
 
         LinearLayout linearLayoutTmap = (LinearLayout) view.findViewById(R.id.llt);
         tMapView = new TMapView(getActivity().getApplicationContext());

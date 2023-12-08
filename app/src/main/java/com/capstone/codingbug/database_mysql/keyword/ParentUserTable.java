@@ -5,4 +5,5 @@ public class ParentUserTable {
     public static final String MY_ID = "my_id";
     public static final String PARENT_USER_ID = "parent_phone";
 
+
 }

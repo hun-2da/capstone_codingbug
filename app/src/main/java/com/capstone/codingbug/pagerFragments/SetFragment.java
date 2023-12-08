@@ -52,6 +52,8 @@ public class SetFragment extends Fragment {
     String p_phone = "";
     Switch smsSwitch;
 
+
+
     Handler mainHandler = new Handler(Looper.getMainLooper());
 
     boolean message_boolean = false;
@@ -63,8 +65,6 @@ public class SetFragment extends Fragment {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_set, container, false);
         editText = view.findViewById(R.id.phone_editText);
 
-
-
         localdb = new LocalDataBaseHelper(getContext().getApplicationContext());// 로컬 데이터베이스 생성
         ldb = localdb.getReadableDatabase();
 
@@ -73,6 +73,7 @@ public class SetFragment extends Fragment {
         smsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
                 if (b) {
                     String[] columns = {LocalDataBaseHelper.parent_phone};
                     Cursor cursor = ldb.query(LocalDataBaseHelper.table, columns, null, null, null, null, null);
@@ -466,7 +467,7 @@ public class SetFragment extends Fragment {
 
                         return;
                     }
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 5, locationListener);
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 0, locationListener);
                 }
             });
             try {
@@ -475,11 +476,12 @@ public class SetFragment extends Fragment {
                 sendSMS(context, phone, message);
 
 
-                Thread.sleep(294000);  // 총 5분에 한번씩
+                Thread.sleep(/*294000*/1000);  // 총 5분에 한번씩
             }catch(Exception e){}
 
         }//asd
     }//asdfe
+
     public void sendSMS(Context context,String phoneNumber, String message) {
         SmsManager smsManager = SmsManager.getDefault();
         PendingIntent sentPI;
