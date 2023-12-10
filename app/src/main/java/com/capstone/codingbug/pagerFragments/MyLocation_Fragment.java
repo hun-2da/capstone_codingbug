@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.os.AsyncTask;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.skt.Tmap.TMapCircle;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapPolyLine;
 import com.skt.Tmap.TMapView;
@@ -34,6 +36,16 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import com.capstone.codingbug.R;
+
+import com.capstone.codingbug.database_mysql.DatabaseConnection;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 
 public class MyLocation_Fragment extends Fragment {
 
@@ -93,6 +105,9 @@ public class MyLocation_Fragment extends Fragment {
 
         tMapView.setSKTMapApiKey("6QqIU9fnZUao65WJCM7ptafry6XfQovT1PoVoB4a");
         linearLayoutTmap.addView(tMapView);
+
+        //위험지역 원으로 표시
+        new FetchDangerZoneDataTask().execute();
 
         // Inflate the layout for this fragment
         return view;
@@ -183,6 +198,8 @@ public class MyLocation_Fragment extends Fragment {
                         if (!pointList.isEmpty()) {
                             TMapPoint centerPoint = pointList.get(0);
                             tMapView.setCenterPoint(centerPoint.getLongitude(), centerPoint.getLatitude());
+
+
                         }
                     }
                 } catch (JSONException e) {
@@ -221,4 +238,110 @@ public class MyLocation_Fragment extends Fragment {
             return null;
         }
     }
+
+    //위험지역 정보 Circle로 그리기
+    private class FetchDangerZoneDataTask extends AsyncTask<Void, Void, ArrayList<DangerZoneInfo>> {
+
+        @Override
+        protected ArrayList<DangerZoneInfo> doInBackground(Void... voids) {
+            // 데이터베이스에서 위험 지역 데이터 가져오기
+            ArrayList<DangerZoneInfo> dangerZoneList = new ArrayList<>();
+
+            try {
+                DatabaseConnection dbConnection = new DatabaseConnection(getActivity());
+                Statement statement = dbConnection.get_mysql();
+                ResultSet resultSet = statement.executeQuery("SELECT latitude, longitude, level FROM Danger_Location");
+
+                while (resultSet.next()) {
+                    double latitude = resultSet.getDouble("latitude");
+                    double longitude = resultSet.getDouble("longitude");
+                    int level = resultSet.getInt("level");
+                    dangerZoneList.add(new DangerZoneInfo(latitude, longitude, level));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return dangerZoneList;
+        }
+
+        // 위험 지역을 나타내는 TMapCircle 추가
+        @Override
+        protected void onPostExecute(ArrayList<DangerZoneInfo> dangerZoneList) {
+            int circleIndex = 1;
+            for (DangerZoneInfo dangerZoneInfo : dangerZoneList) {
+                TMapCircle dangerZoneCircle = new TMapCircle();
+                dangerZoneCircle.setCenterPoint(new TMapPoint(dangerZoneInfo.getLatitude(), dangerZoneInfo.getLongitude()));
+                dangerZoneCircle.setRadius(100);
+                dangerZoneCircle.setCircleWidth(2);
+
+                // level에 따라 원의 색깔을 설정
+                int level = dangerZoneInfo.getLevel();
+                switch (level) {
+                    case 4:
+                        dangerZoneCircle.setLineColor(Color.rgb(255, 179, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(255, 179, 0));
+                        break;
+                    case 5:
+                        dangerZoneCircle.setLineColor(Color.rgb(255, 154, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(255, 154, 0));
+                        break;
+                    case 6:
+                        dangerZoneCircle.setLineColor(Color.rgb(255, 102, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(255, 102, 0));
+                        break;
+                    case 7:
+                        dangerZoneCircle.setLineColor(Color.rgb(255, 68, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(255, 68, 0));
+                        break;
+                    case 8:
+                        dangerZoneCircle.setLineColor(Color.rgb(255, 0, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(255, 0, 0));
+                        break;
+                    case 9:
+                        dangerZoneCircle.setLineColor(Color.rgb(153, 0, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(153, 0, 0));
+                        break;
+                    case 10:
+                        dangerZoneCircle.setLineColor(Color.rgb(51, 0, 0));
+                        dangerZoneCircle.setAreaColor(Color.rgb(51, 0, 0));
+                        break;
+                    default:
+                        dangerZoneCircle.setLineColor(Color.BLUE);
+                        dangerZoneCircle.setAreaColor(Color.GRAY);
+                }
+
+                dangerZoneCircle.setAreaAlpha(100);
+                tMapView.addTMapCircle("circle" + circleIndex, dangerZoneCircle);
+                circleIndex++;
+            }
+        }
+    }
+
+    // 위험 지역 정보를 담는 클래스
+    class DangerZoneInfo {
+        private double latitude;
+        private double longitude;
+        private int level;
+
+        public DangerZoneInfo(double latitude, double longitude, int level) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.level = level;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public int getLevel() {
+            return level;
+        }
+    }
+
 }
