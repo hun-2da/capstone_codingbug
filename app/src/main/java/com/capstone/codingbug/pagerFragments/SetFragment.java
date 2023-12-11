@@ -56,7 +56,7 @@ public class SetFragment extends Fragment {
 
     Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    boolean message_boolean = false;
+    public static boolean message_boolean = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -473,10 +473,10 @@ public class SetFragment extends Fragment {
             try {
                 Thread.sleep(6000);
                 String message = "안심귀갓길 : (" + latitude + "," + longitude + ")";
-                sendSMS(context, phone, message);
+                //sendSMS(context, phone, message);
 
 
-                Thread.sleep(/*294000*/1000);  // 총 5분에 한번씩
+                Thread.sleep(174000);  // 총 5분에 한번씩
             }catch(Exception e){}
 
         }//asd

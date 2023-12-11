@@ -26,6 +26,7 @@ import com.capstone.codingbug.MainActivity;
 import com.capstone.codingbug.R;
 import com.capstone.codingbug.localdb.LocalDataBaseHelper;
 import com.skt.Tmap.TMapMarkerItem;
+import com.skt.Tmap.TMapMarkerItem2;
 import com.skt.Tmap.TMapPoint;
 import com.skt.Tmap.TMapView;
 
@@ -122,6 +123,13 @@ public class ReadLocation_Fragment extends Fragment {
             }
         });
 
+        tMapView2.setOnMarkerClickEvent(new TMapView.OnCalloutMarker2ClickCallback() {
+            @Override
+            public void onCalloutMarker2ClickEvent(String s, TMapMarkerItem2 tMapMarkerItem2) {
+
+            }
+        });
+
 
 
         return view;
@@ -188,6 +196,7 @@ public class ReadLocation_Fragment extends Fragment {
     public void add_marker(double latitude, double longitude, String phone, String date) {
 
         TMapMarkerItem markerItem = new TMapMarkerItem();
+
         markerItem.setIcon(resizedBitmap);
         markerItem.setPosition(0.5f, 1.0f);
 
