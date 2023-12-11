@@ -23,6 +23,7 @@ import com.skt.Tmap.TMapPolyLine;
 import com.skt.Tmap.TMapView;
 import com.skt.Tmap.TMapPolygon;
 
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,10 +54,14 @@ public class MyLocation_Fragment extends Fragment {
     private EditText editText2;
     private TMapView tMapView;
 
+    private TMapPolygon tMapPolygon;
+    private ArrayList<TMapPoint> alTMapPoint;
+
     /**입력 주소창을 찾기 위한 띄워줄 frameLayout*/
     FrameLayout frameLayout;
 
     Button path_button;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -146,6 +151,27 @@ public class MyLocation_Fragment extends Fragment {
                         .addHeader("appKey", "6QqIU9fnZUao65WJCM7ptafry6XfQovT1PoVoB4a")
                         .build();
 
+                double px = -((endPoint.getLongitude() - startPoint.getLongitude())*0.3);
+                double py = (endPoint.getLatitude() - startPoint.getLatitude())*0.3;
+
+                ArrayList<TMapPoint> alTMapPoint = new ArrayList<>();
+
+                alTMapPoint.add(new TMapPoint(startPoint.getLatitude()+px+py, startPoint.getLongitude()+py+px));
+                alTMapPoint.add(new TMapPoint(endPoint.getLatitude()+px-py, endPoint.getLongitude()+py-px));
+                alTMapPoint.add(new TMapPoint(endPoint.getLatitude()-px-py, endPoint.getLongitude()-py-px));
+                alTMapPoint.add(new TMapPoint(startPoint.getLatitude()-px+py, startPoint.getLongitude()-py+px));
+
+
+                tMapPolygon = new TMapPolygon();
+                tMapPolygon.setLineColor(Color.BLUE);
+                tMapPolygon.setPolygonWidth(2);
+                tMapPolygon.setAreaColor(Color.GRAY);
+                tMapPolygon.setAreaAlpha(100);
+                for (int i = 0; i < alTMapPoint.size(); i++) {
+                    tMapPolygon.addPolygonPoint(alTMapPoint.get(i));
+                }
+                tMapView.addTMapPolygon("Line1", tMapPolygon);
+
                 Response response = client.newCall(request).execute();
                 return response.body().string();
 
@@ -199,8 +225,9 @@ public class MyLocation_Fragment extends Fragment {
                             TMapPoint centerPoint = pointList.get(0);
                             tMapView.setCenterPoint(centerPoint.getLongitude(), centerPoint.getLatitude());
 
-
+                            alTMapPoint = new ArrayList<>(pointList);
                         }
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -315,8 +342,46 @@ public class MyLocation_Fragment extends Fragment {
                 dangerZoneCircle.setAreaAlpha(100);
                 tMapView.addTMapCircle("circle" + circleIndex, dangerZoneCircle);
                 circleIndex++;
+
+                if (alTMapPoint != null) {
+                    for (DangerZoneInfo dangerZone: dangerZoneList) {
+                        TMapPoint dangerZonePoint = new TMapPoint(dangerZone.getLatitude(), dangerZone.getLongitude());
+
+                        if (tMapPolygon != null && isPointInsidePolygon(dangerZonePoint, tMapPolygon.getPolygonPoint())==true){
+                            ArrayList<TMapPoint> polygonPoints = new ArrayList<>();
+                            polygonPoints.add(new TMapPoint(dangerZonePoint.getLatitude() + 0.01, dangerZonePoint.getLongitude() + 0.01));
+                            polygonPoints.add(new TMapPoint(dangerZonePoint.getLatitude() - 0.01, dangerZonePoint.getLongitude() + 0.01));
+                            polygonPoints.add(new TMapPoint(dangerZonePoint.getLatitude() - 0.01, dangerZonePoint.getLongitude() - 0.01));
+                            polygonPoints.add(new TMapPoint(dangerZonePoint.getLatitude() + 0.01, dangerZonePoint.getLongitude() - 0.01));
+
+                            TMapPolygon tMapPolygon = new TMapPolygon();
+                            tMapPolygon.setLineColor(Color.RED);
+                            tMapPolygon.setPolygonWidth(2);
+                            tMapPolygon.setAreaColor(Color.GRAY);
+                            tMapPolygon.setAreaAlpha(100);
+                            for (int i = 0; i < polygonPoints.size(); i++) {
+                                tMapPolygon.addPolygonPoint(polygonPoints.get(i));
+                            }
+                            tMapView.addTMapPolygon("Line1", tMapPolygon);
+                        }
+                    }
+                }
+
             }
+
         }
+
+        // 점이 다각형 안에 속하는지 확인하는 메서드
+        private boolean isPointInsidePolygon(TMapPoint point, ArrayList<TMapPoint> polygonPoints) {
+            if(((polygonPoints.get(0).getLatitude()<=point.getLatitude()&&point.getLatitude()<=polygonPoints.get(1).getLatitude())&&
+                    ((polygonPoints.get(0).getLongitude()<=point.getLongitude()&&point.getLongitude()<=polygonPoints.get(1).getLongitude())))||
+                    ((polygonPoints.get(0).getLatitude()>=point.getLatitude()&&point.getLatitude()>=polygonPoints.get(1).getLatitude())&&
+                    ((polygonPoints.get(0).getLongitude()>=point.getLongitude()&&point.getLongitude()>=polygonPoints.get(1).getLongitude()))))
+                return true;
+            else
+                return false;
+        }
+
     }
 
     // 위험 지역 정보를 담는 클래스
